@@ -46,6 +46,12 @@ class Server:
 
         start_index = index
         end_index = index + page_size
+        data = self.dataset()
+
+        if end_index >= len(self.__indexed_dataset):
+            next_index = None
+        else:
+            next_index = end_index
 
         return {
             "index": start_index,
