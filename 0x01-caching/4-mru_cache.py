@@ -12,7 +12,7 @@ class MRUCache(BaseCaching):
         self.key_order = []
 
     def put(self, key, item):
-        """ add an item in cache """
+        """ Add an item in the cache """
         if key is None or item is None:
             return
 
@@ -21,10 +21,11 @@ class MRUCache(BaseCaching):
         self.key_order.append(key)
 
         if len(self.cache_data) >= self.MAX_ITEMS:
-            mru_key = self.key_order.pop()
-            if mru_key in self.cache_data:
-                del self.cache_data[mru_key]
-                print("DISCARD:", mru_key)
+            if self.key_order:
+                mru_key = self.key_order.pop()
+                if mru_key in self.cache_data:
+                    del self.cache_data[mru_key]
+                    print("DISCARD:", mru_key)
 
         self.cache_data[key] = item
 
