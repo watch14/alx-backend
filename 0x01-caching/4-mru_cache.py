@@ -4,12 +4,12 @@ BaseCaching = __import__('base_caching').BaseCaching
 
 
 class MRUCache(BaseCaching):
-    """ MRUCache """
+    """ MRUCache defines a caching system with MRU eviction policy """
 
     def __init__(self):
-        """ MRU cache """
+        """ Initialize the cache """
         super().__init__()
-        self.key_order = []
+        self.order = []
 
     def put(self, key, item):
         """ Add an item in the cache """
@@ -17,28 +17,23 @@ class MRUCache(BaseCaching):
             return
 
         if key in self.cache_data:
-            self.key_order.remove(key)
-        self.key_order.append(key)
-
-        if len(self.cache_data) >= self.MAX_ITEMS:
-            if self.key_order:
-                mru_key = self.key_order.pop()
-                if mru_key in self.cache_data:
-                    del self.cache_data[mru_key]
-                    print("DISCARD:", mru_key)
+            self.order.remove(key)
+        elif len(self.cache_data) >= BaseCaching.MAX_ITEMS:
+            mru_key = self.order.pop()
+            del self.cache_data[mru_key]
+            print(f"DISCARD: {mru_key}")
 
         self.cache_data[key] = item
+        self.order.append(key)
 
     def get(self, key):
         """ Get an item by key """
         if key is None or key not in self.cache_data:
             return None
 
-        if key in self.key_order:
-            self.key_order.remove(key)
-            self.key_order.append(key)
-
-        return self.cache_data[key]
+        self.order.remove(key)
+        self.order.append(key)
+        return self.cache_data.get(key)
 
 
 if __name__ == "__main__":
