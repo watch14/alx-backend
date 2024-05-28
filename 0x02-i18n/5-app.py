@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
-"""Mocking user login"""
-
-from flask import Flask, render_template, request, g
+""" babel flastk """
 from flask_babel import Babel
-
-app = Flask(__name__)
-babel = Babel(app)
+from flask import Flask, render_template, request, g
+from typing import Union
 
 
 users = {
@@ -16,25 +13,49 @@ users = {
 }
 
 
-def get_user():
-    """Get user by ID"""
-    login_id = request.args.get('login_as')
-    if login_id and int(login_id) in users:
-        return users[int(login_id)]
+class Config(object):
+    '''
+        Babel configuration.
+    '''
+    LANGUAGES = ['en', 'fr']
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
+
+
+app = Flask(__name__)
+babel = Babel(app)
+app.config.from_object(Config)
+
+
+def get_user() -> Union[dict, None]:
+    """ get user """
+    id = request.args.get('login_as', None)
+    if id is not None and int(id) in users.keys():
+        return users.get(int(id))
     return None
 
 
 @app.before_request
 def before_request():
-    """Set user information in flask.g"""
-    g.user = get_user()
+    """ bef user """
+    user = get_user()
+    g.user = user
 
 
-@app.route("/")
-def index():
-    """Index page"""
-    return render_template("5-index.html")
+@babel.localeselector
+def get_locale() -> str:
+    """ get loco """
+    locale = request.args.get('locale')
+    if locale in app.config['LANGUAGES']:
+        return locale
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
-if __name__ == "__main__":
+@app.route('/')
+def index() -> str:
+    """ get index """
+    return render_template('5-index.html')
+
+
+if __name__ == '__main__':
     app.run(debug=True)
