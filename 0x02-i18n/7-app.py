@@ -2,6 +2,7 @@
 """ babel flastk """
 from flask_babel import Babel
 from flask import Flask, render_template, request, g
+from typing import Union, Dict
 
 
 users = {
@@ -24,10 +25,10 @@ babel = Babel(app)
 app.config.from_object(Config)
 
 
-def get_user() -> Union[dict, None]:
+def get_user() -> Union[Dict, None]:
     """ get user """
     id = request.args.get('login_as', None)
-    if id is not None and int(id) in users.keys():
+    if id and int(id) in users.keys():
         return users.get(int(id))
     return None
 
@@ -51,7 +52,7 @@ def get_locale() -> str:
 @app.route('/')
 def index() -> str:
     """ get index """
-    return render_template('5-index.html')
+    return render_template('6-index.html')
 
 
 if __name__ == '__main__':
