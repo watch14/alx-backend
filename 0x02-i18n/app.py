@@ -3,6 +3,9 @@
 from flask_babel import Babel
 from flask import Flask, render_template, request, g
 from typing import Union, Dict
+from datetime import timezone as tmzn
+from pytz import timezone
+import pytz.exceptions
 
 
 users = {
@@ -41,12 +44,39 @@ def before_request():
 
 
 @babel.localeselector
-def get_locale() -> str:
+def get_locale():
     """ get loco """
-    locale = request.args.get('locale')
-    if locale in app.config['LANGUAGES']:
-        return locale
+    loc = request.args.get('locale')
+    if loc in app.config['LANGUAGES']:
+        return loc
+    if g.user:
+        loc = g.user.get('locale')
+        if loc and loc in app.config['LANGUAGES']:
+            return loc
+    loc = request.headers.get('locale', None)
+    if loc in app.config['LANGUAGES']:
+        return loc
     return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+
+
+@babel.timezoneselector
+def get_timezone():
+    """ timezone """
+    tzone = request.args.get('timezone', None)
+    if tzone:
+        try:
+            return timezone(tzone).zone
+        except pytz.exceptions.UnknownTimeZoneError:
+            pass
+    if g.user:
+        try:
+            tzone = g.user.get('timezone')
+            return timezone(tzone).zone
+        except pytz.exceptions.UnknownTimeZoneError:
+            pass
+    defTimeZone = app.config['BABEL_DEFAULT_TIMEZONE']
+    return defTimeZone
 
 
 @app.route('/')
